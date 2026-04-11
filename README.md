@@ -177,11 +177,13 @@ Output:  Linear(128, num_classes) + Softmax
 
 | Priority | Dataset | Classes | Type | Source |
 |----------|---------|---------|------|--------|
-| 1 | ASL Alphabet | 29 | Static images | Kaggle |
-| 2 | ASL MNIST | 24 | 28×28 grayscale | HuggingFace |
-| 3 | WLASL-2000 | 2000 | Video clips | Kaggle |
-| 4 | How2Sign | — | Continuous video | how2sign.github.io |
-| 5 | MS-ASL | 1000 | Video clips | Microsoft Research |
+| 1 | ASL Alphabet | 29 | Static images | [Kaggle](https://www.kaggle.com/datasets/grassknoted/asl-alphabet) |
+| 2 | ASL MNIST | 24 | 28×28 grayscale | [HuggingFace](https://huggingface.co/datasets/Voxel51/American-Sign-Language-MNIST) |
+| 3 | WLASL-2000 | 2000 | Video clips | [Kaggle](https://www.kaggle.com/datasets/risangbaskoro/wlasl-processed) |
+| 4 | How2Sign | — | Continuous video | [how2sign.github.io](https://how2sign.github.io/) |
+| 5 | MS-ASL | 1000 | Video clips | [Microsoft Research](https://www.microsoft.com/en-us/research/project/ms-asl/) |
+
+*Note: The actual raw image datasets and `.npy` models are purposely excluded via `.gitignore` to keep this repository lightweight. Download them from the links above and place them in the `data/` directory.*
 
 ---
 
