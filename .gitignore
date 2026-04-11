@@ -1,0 +1,31 @@
+# Virtual Environment
+venv/
+env/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Data and Models
+data/raw/
+data/processed/
+data/augmented/
+models/checkpoints/
+
+# Logs and databases
+logs/
+*.log
+*.sqlite3
+
+# IDEs and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/

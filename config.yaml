@@ -1,0 +1,199 @@
+# ============================================================
+# ASL Bridge — Master Configuration
+# All hyperparameters, paths, and settings in one place.
+# ============================================================
+
+# ── Project Paths ──
+paths:
+  project_root: "."
+  data:
+    raw: "data/raw"
+    processed: "data/processed"
+    augmented: "data/augmented"
+  models:
+    checkpoints: "models/checkpoints"
+  frontend: "frontend"
+
+# ── Dataset Configuration ──
+datasets:
+  asl_alphabet:
+    name: "ASL Alphabet (Kaggle)"
+    local_source: "/Users/gopikrishnareddykatkuri/Desktop/SignLanguage/archive (3)"
+    raw_path: "data/raw/asl_alphabet"
+    train_dir: "asl_alphabet_train/asl_alphabet_train"
+    test_dir: "asl_alphabet_test/asl_alphabet_test"
+    num_classes: 29
+    classes:
+      - "A" 
+      - "B"
+      - "C"
+      - "D"
+      - "E"
+      - "F"
+      - "G"
+      - "H"
+      - "I"
+      - "J"
+      - "K"
+      - "L"
+      - "M"
+      - "N"
+      - "O"
+      - "P"
+      - "Q"
+      - "R"
+      - "S"
+      - "T"
+      - "U"
+      - "V"
+      - "W"
+      - "X"
+      - "Y"
+      - "Z"
+      - "del"
+      - "nothing"
+      - "space"
+    image_size: [200, 200]
+    description: "Static ASL alphabet letters A-Z plus del/nothing/space. ~3000 images per class."
+
+  asl_mnist:
+    name: "American Sign Language MNIST (HuggingFace)"
+    hf_repo: "Voxel51/American-Sign-Language-MNIST"
+    raw_path: "data/raw/asl_mnist"
+    num_classes: 24  # excludes J and Z (motion-based)
+    image_size: [28, 28]
+    description: "28x28 grayscale hand images. 24 classes (no J/Z). HuggingFace hosted."
+
+  wlasl:
+    name: "WLASL-2000 (Kaggle)"
+    raw_path: "data/raw/wlasl"
+    num_classes: 2000
+    kaggle_dataset: "risangbaskoro/wlasl-processed"
+    description: "2000 word-level ASL glosses with video clips."
+
+  how2sign:
+    name: "How2Sign"
+    raw_path: "data/raw/how2sign"
+    url: "https://how2sign.github.io/"
+    description: "80 hours of continuous ASL signing. Sentence-level context."
+
+  ms_asl:
+    name: "MS-ASL (Microsoft)"
+    raw_path: "data/raw/ms_asl"
+    num_classes: 1000
+    description: "25K videos, 1000 sign classes. Requires application for access."
+
+# ── MediaPipe Configuration ──
+mediapipe:
+  holistic:
+    static_image_mode: false
+    model_complexity: 1
+    min_detection_confidence: 0.5
+    min_tracking_confidence: 0.5
+  hands:
+    static_image_mode: false
+    max_num_hands: 2
+    model_complexity: 1
+    min_detection_confidence: 0.7
+    min_tracking_confidence: 0.5
+  # Landmark counts
+  landmarks:
+    hand: 21          # 21 landmarks × 3 (x, y, z)
+    pose: 33          # 33 pose landmarks × 4 (x, y, z, visibility)
+    face: 468         # 468 face landmarks × 3
+
+# ── Model Architecture ──
+model:
+  name: "ASLGRUClassifier"
+  input_features: 63         # 21 hand landmarks × 3 coords
+  sequence_length: 30        # sliding window of 30 frames
+  hidden_size: 128           # Linear projection dimension
+  gru_hidden: 256            # GRU hidden dimension
+  gru_layers: 2              # number of stacked GRU layers
+  gru_dropout: 0.3           # dropout between GRU layers
+  fc_dropout: 0.4            # dropout before final classifier
+  fc_hidden: 128             # fully-connected hidden dimension
+  num_classes: 29            # updated per dataset at runtime
+
+# ── Training Hyperparameters ──
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001       # Adam initial LR
+  optimizer: "adam"
+  scheduler: "cosine_annealing"
+  scheduler_params:
+    T_max: 50                # cosine annealing period = epochs
+    eta_min: 0.00001
+  loss: "cross_entropy"
+  early_stopping:
+    enabled: true
+    patience: 10
+    min_delta: 0.001
+    monitor: "val_loss"
+  gradient_clip: 1.0
+  seed: 42
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+
+# ── Data Augmentation ──
+augmentation:
+  enabled: true
+  temporal_jitter:
+    enabled: true
+    max_shift: 3             # ±3 frames
+  horizontal_flip:
+    enabled: true
+    probability: 0.5
+  gaussian_noise:
+    enabled: true
+    sigma: 0.01
+  random_scale:
+    enabled: false
+    range: [0.9, 1.1]
+  random_rotation:
+    enabled: false
+    max_degrees: 15
+
+# ── Inference Pipeline ──
+inference:
+  sliding_window: 30         # number of frames in buffer
+  stabilizer:
+    window_size: 10          # check last N predictions
+    threshold: 8             # must match in 8/10 frames
+  confidence_threshold: 0.6  # minimum softmax confidence to accept
+  target_fps: 30
+  max_latency_ms: 50         # target <50ms per frame
+
+# ── TTS Configuration ──
+tts:
+  engine: "pyttsx3"
+  rate: 150                  # words per minute
+  volume: 0.9               # 0.0 to 1.0
+  voice_index: 0             # 0 = default system voice
+
+# ── STT Configuration ──
+stt:
+  engine: "speech_recognition"
+  recognizer: "google"       # google (offline with pocketsphinx fallback)
+  energy_threshold: 300
+  pause_threshold: 0.8       # seconds of silence before phrase is considered complete
+  phrase_time_limit: 10      # max seconds per phrase
+
+# ── Server Configuration ──
+server:
+  host: "127.0.0.1"
+  port: 8000
+  cors_origins:
+    - "http://localhost:8000"
+    - "http://127.0.0.1:8000"
+    - "http://localhost:5500"
+    - "http://127.0.0.1:5500"
+  sse_retry_ms: 1000
+
+# ── Logging ──
+logging:
+  level: "INFO"
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file: "logs/asl_bridge.log"

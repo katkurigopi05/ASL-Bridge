@@ -1,0 +1,35 @@
+# ASL Bridge — Requirements
+# Python 3.10+ required
+
+# ── Core ML / Vision ──
+torch==2.2.2
+torchvision==0.17.2
+mediapipe==0.10.14
+opencv-python==4.9.0.80
+numpy==1.26.4
+scikit-learn==1.4.2
+
+# ── Audio ──
+pyttsx3==2.90
+SpeechRecognition==3.10.4
+PyAudio==0.2.14
+
+# ── Server ──
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+sse-starlette==2.1.0
+
+# ── Utilities ──
+pyyaml==6.0.1
+tqdm==4.66.4
+matplotlib==3.8.4
+seaborn==0.13.2
+pandas==2.2.2
+
+# ── Dataset helpers ──
+datasets==2.19.1
+huggingface-hub==0.23.0
+kaggle==1.6.14
+
+# ── Testing ──
+pytest==8.2.1
